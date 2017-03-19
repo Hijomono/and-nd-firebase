@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
 
 repositories {
     mavenLocal()
@@ -44,3 +43,5 @@ dependencies {
 
     compile 'com.google.firebase:firebase-database:10.2.0'
 }
+
+apply plugin: 'com.google.gms.google-services'
