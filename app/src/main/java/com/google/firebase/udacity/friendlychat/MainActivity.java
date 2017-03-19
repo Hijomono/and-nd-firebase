@@ -36,6 +36,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.OnTextChanged;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
@@ -43,78 +48,37 @@ public class MainActivity extends AppCompatActivity {
     public static final String ANONYMOUS = "anonymous";
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
 
-    private ListView mMessageListView;
-    private MessageAdapter mMessageAdapter;
-    private ProgressBar mProgressBar;
-    private ImageButton mPhotoPickerButton;
-    private EditText mMessageEditText;
-    private Button mSendButton;
-
     private String mUsername;
+    private MessageAdapter mMessageAdapter;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
+
+    @BindView(R.id.messageListView)
+    ListView mMessageListView;
+    @BindView(R.id.progressBar)
+    ProgressBar mProgressBar;
+    @BindView(R.id.photoPickerButton)
+    ImageButton mPhotoPickerButton;
+    @BindView(R.id.messageEditText)
+    EditText mMessageEditText;
+    @BindView(R.id.sendButton)
+    Button mSendButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         mUsername = ANONYMOUS;
-
-        // Initialize references to views
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mMessageListView = (ListView) findViewById(R.id.messageListView);
-        mPhotoPickerButton = (ImageButton) findViewById(R.id.photoPickerButton);
-        mMessageEditText = (EditText) findViewById(R.id.messageEditText);
-        mSendButton = (Button) findViewById(R.id.sendButton);
 
         // Initialize message ListView and its adapter
         List<FriendlyMessage> friendlyMessages = new ArrayList<>();
         mMessageAdapter = new MessageAdapter(this, R.layout.item_message, friendlyMessages);
         mMessageListView.setAdapter(mMessageAdapter);
 
-        // Initialize progress bar
-        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-
-        // ImagePickerButton shows an image picker to upload a image for a message
-        mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO: Fire an intent to show an image picker
-            }
-        });
-
-        // Enable Send button when there's text to send
-        mMessageEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.toString().trim().length() > 0) {
-                    mSendButton.setEnabled(true);
-                } else {
-                    mSendButton.setEnabled(false);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });
         mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
 
-        // Send button sends a message and clears the EditText
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO: Send messages on click
-
-                // Clear input box
-                mMessageEditText.setText("");
-            }
-        });
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference().child("messages");
     }
@@ -130,4 +94,23 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
     }
+
+    @OnClick(R.id.photoPickerButton)
+    public void pickPhoto() {
+        // TODO: Fire an intent to show an image picker
+    }
+
+    @OnTextChanged(R.id.messageEditText)
+    public void notifyTextChanged(CharSequence charSequence) {
+        mSendButton.setEnabled(charSequence.toString().trim().length() > 0);
+    }
+
+    @OnClick(R.id.sendButton)
+    public void send() {
+        // TODO: Send messages on click
+
+        // Clear input box
+        mMessageEditText.setText("");
+    }
+
 }

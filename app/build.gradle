@@ -11,7 +11,8 @@ Map<String, String> versions = [
         junit        : '4.12',
         support      : '25.3.0',
         glide        : '3.7.0',
-        firebase     : '10.2.0'
+        firebase     : '10.2.0',
+        butterknife  : '8.5.1'
 ]
 
 android {
@@ -49,6 +50,9 @@ dependencies {
     compile "com.github.bumptech.glide:glide:$versions.glide"
 
     compile "com.google.firebase:firebase-database:$versions.firebase"
+
+    compile "com.jakewharton:butterknife:$versions.butterknife"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$versions.butterknife"
 }
 
 apply plugin: 'com.google.gms.google-services'

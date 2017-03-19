@@ -12,6 +12,9 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MessageAdapter extends ArrayAdapter<FriendlyMessage> {
     public MessageAdapter(Context context, int resource, List<FriendlyMessage> objects) {
         super(context, resource, objects);
@@ -22,27 +25,38 @@ public class MessageAdapter extends ArrayAdapter<FriendlyMessage> {
         if (convertView == null) {
             convertView = ((Activity) getContext()).getLayoutInflater().inflate(R.layout.item_message, parent, false);
         }
+        final ViewHolder holder = new ViewHolder(convertView);
+        final FriendlyMessage message = getItem(position);
 
-        ImageView photoImageView = (ImageView) convertView.findViewById(R.id.photoImageView);
-        TextView messageTextView = (TextView) convertView.findViewById(R.id.messageTextView);
-        TextView authorTextView = (TextView) convertView.findViewById(R.id.nameTextView);
-
-        FriendlyMessage message = getItem(position);
-
-        boolean isPhoto = message.getPhotoUrl() != null;
-        if (isPhoto) {
-            messageTextView.setVisibility(View.GONE);
-            photoImageView.setVisibility(View.VISIBLE);
-            Glide.with(photoImageView.getContext())
+        if (message.getPhotoUrl() != null) {
+            holder.message.setVisibility(View.GONE);
+            holder.photo.setVisibility(View.VISIBLE);
+            Glide.with(parent.getContext())
                     .load(message.getPhotoUrl())
-                    .into(photoImageView);
+                    .into(holder.photo);
         } else {
-            messageTextView.setVisibility(View.VISIBLE);
-            photoImageView.setVisibility(View.GONE);
-            messageTextView.setText(message.getText());
+            holder.message.setVisibility(View.VISIBLE);
+            holder.photo.setVisibility(View.GONE);
+            holder.message.setText(message.getText());
         }
-        authorTextView.setText(message.getName());
+        holder.name.setText(message.getName());
 
         return convertView;
     }
+
+    static class ViewHolder {
+
+        @BindView(R.id.photoImageView)
+        ImageView photo;
+        @BindView(R.id.messageTextView)
+        TextView message;
+        @BindView(R.id.nameTextView)
+        TextView name;
+
+        ViewHolder(final View view) {
+            ButterKnife.bind(this, view);
+        }
+
+    }
+
 }
