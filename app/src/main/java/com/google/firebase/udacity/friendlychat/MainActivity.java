@@ -15,17 +15,18 @@
  */
 package com.google.firebase.udacity.friendlychat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
 import android.text.InputFilter;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
     private static final int RC_SIGN_IN = MAIN_ACTIVITY_RC + 1;
     private static final int RC_PHOTO_PICKER = MAIN_ACTIVITY_RC + 2;
+    private static final int RC_READ_EXT_STORAGE_PERMISSION = MAIN_ACTIVITY_RC + 3;
 
     private String mUsername = ANONYMOUS;
     private MessageAdapter mMessageAdapter;
@@ -163,9 +165,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(
+            final int requestCode,
+            @NonNull final String[] permissions,
+            @NonNull final int[] grantResults) {
+
+        if (requestCode == RC_READ_EXT_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                launchPhotoPicker();
+            }
+        }
+    }
+
     @OnClick(R.id.photoPickerButton)
-    public void pickPhoto() {
-        // TODO: Fire an intent to show an image picker
+    public void pickPhotoClicked() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    RC_READ_EXT_STORAGE_PERMISSION);
+        } else {
+            launchPhotoPicker();
+        }
     }
 
     @OnTextChanged(R.id.messageEditText)
@@ -175,7 +197,6 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.sendButton)
     public void send() {
-        // TODO: Send messages on click
         FriendlyMessage friendlyMessage = new FriendlyMessage(
                 mMessageEditText.getText().toString(),
                 mUsername,
@@ -233,6 +254,15 @@ public class MainActivity extends AppCompatActivity {
             databaseReference.removeEventListener(childEventListener);
         }
         childEventListener = null;
+    }
+
+    private void launchPhotoPicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/jpeg");
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+        startActivityForResult(
+                Intent.createChooser(intent, "Complete action using"),
+                RC_PHOTO_PICKER);
     }
 
 }
