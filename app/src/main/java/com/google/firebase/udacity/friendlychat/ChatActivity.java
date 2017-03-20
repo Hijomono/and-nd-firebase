@@ -46,6 +46,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.firebase.udacity.friendlychat.android.ActivityScope;
+import com.google.firebase.udacity.friendlychat.android.FriendlyChatApplication;
+import com.google.firebase.udacity.friendlychat.android.MainComponent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,6 +102,10 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        DaggerChatActivity_Component.builder()
+                .mainComponent(FriendlyChatApplication.getComponent())
+                .build()
+                .inject(this);
 
         // Initialize message ListView and its adapter
         List<FriendlyMessage> friendlyMessages = new ArrayList<>();
@@ -288,6 +295,12 @@ public class ChatActivity extends AppCompatActivity {
         startActivityForResult(
                 Intent.createChooser(intent, "Complete action using"),
                 RC_PHOTO_PICKER);
+    }
+
+    @ActivityScope
+    @dagger.Component(dependencies = MainComponent.class)
+    public interface Component {
+        void inject(ChatActivity activity);
     }
 
 }
