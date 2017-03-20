@@ -56,9 +56,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTextChanged;
 
-public class MainActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "ChatActivity";
     private static final int MAIN_ACTIVITY_RC = 1000;
 
     public static final String ANONYMOUS = "anonymous";
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                                     .build(),
                             RC_SIGN_IN);
                 } else {
-                    Toast.makeText(MainActivity.this, "Authentication successful", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChatActivity.this, "Authentication successful", Toast.LENGTH_SHORT).show();
                     onSignedIn(firebaseAuth.getCurrentUser().getDisplayName());
                 }
             }
