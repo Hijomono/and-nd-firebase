@@ -43,10 +43,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Logger;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.google.firebase.udacity.friendlychat.DaggerChatActivity_Component;
 import com.google.firebase.udacity.friendlychat.R;
 import com.google.firebase.udacity.friendlychat.android.ActivityScope;
 import com.google.firebase.udacity.friendlychat.android.FriendlyChatApplication;
@@ -118,6 +118,7 @@ public class ChatActivity extends AppCompatActivity {
         mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
 
         firebaseDatabase = FirebaseDatabase.getInstance();
+        firebaseDatabase.setLogLevel(Logger.Level.DEBUG);
         databaseReference = firebaseDatabase.getReference().child("messages");
 
         firebaseStorage = FirebaseStorage.getInstance();
