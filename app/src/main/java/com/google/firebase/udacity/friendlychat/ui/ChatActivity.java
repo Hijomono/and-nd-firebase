@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.firebase.udacity.friendlychat;
+package com.google.firebase.udacity.friendlychat.ui;
 
 import android.Manifest;
 import android.content.Intent;
@@ -46,9 +46,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.firebase.udacity.friendlychat.DaggerChatActivity_Component;
+import com.google.firebase.udacity.friendlychat.R;
 import com.google.firebase.udacity.friendlychat.android.ActivityScope;
 import com.google.firebase.udacity.friendlychat.android.FriendlyChatApplication;
 import com.google.firebase.udacity.friendlychat.android.MainComponent;
+import com.google.firebase.udacity.friendlychat.model.FriendlyMessage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
