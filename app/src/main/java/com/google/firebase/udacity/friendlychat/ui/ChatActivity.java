@@ -36,17 +36,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Logger;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.google.firebase.udacity.friendlychat.R;
 import com.google.firebase.udacity.friendlychat.android.ActivityScope;
 import com.google.firebase.udacity.friendlychat.android.FriendlyChatApplication;
@@ -57,37 +46,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTextChanged;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity implements ChatActivityPresenter.View {
 
-    private static final String TAG = "ChatActivity";
     private static final int MAIN_ACTIVITY_RC = 1000;
 
-    public static final String ANONYMOUS = "anonymous";
-    public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
+    public static final int DEFAULT_MSG_LENGTH_LIMIT = 140;
     private static final int RC_SIGN_IN = MAIN_ACTIVITY_RC + 1;
     private static final int RC_PHOTO_PICKER = MAIN_ACTIVITY_RC + 2;
     private static final int RC_READ_EXT_STORAGE_PERMISSION = MAIN_ACTIVITY_RC + 3;
 
-    private String mUsername = ANONYMOUS;
     private MessageAdapter mMessageAdapter;
 
-    // Database
-    private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference databaseReference;
-    private ChildEventListener childEventListener;
-
-    // Storage
-    private FirebaseStorage firebaseStorage;
-    private StorageReference storageReference;
-
-    // Authentication
-    private FirebaseAuth auth;
-    private FirebaseAuth.AuthStateListener authListener;
+    @Inject
+    ChatActivityPresenter presenter;
 
     @BindView(R.id.messageListView)
     ListView mMessageListView;
@@ -116,34 +94,6 @@ public class ChatActivity extends AppCompatActivity {
         mMessageListView.setAdapter(mMessageAdapter);
 
         mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
-
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        firebaseDatabase.setLogLevel(Logger.Level.DEBUG);
-        databaseReference = firebaseDatabase.getReference().child("messages");
-
-        firebaseStorage = FirebaseStorage.getInstance();
-        storageReference = firebaseStorage.getReference().child("photos");
-
-        auth = FirebaseAuth.getInstance();
-        authListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() == null) {
-                    onSignedOut();
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false)
-                                    .setProviders(Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
-                                    .build(),
-                            RC_SIGN_IN);
-                } else {
-                    Toast.makeText(ChatActivity.this, "Authentication successful", Toast.LENGTH_SHORT).show();
-                    onSignedIn(firebaseAuth.getCurrentUser().getDisplayName());
-                }
-            }
-        };
     }
 
     @Override
@@ -167,14 +117,12 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        auth.addAuthStateListener(authListener);
+        presenter.attach(this);
     }
 
     @Override
     protected void onPause() {
-        auth.removeAuthStateListener(authListener);
-        dettachDatabaseListener();
-        mMessageAdapter.clear();
+        presenter.detach(this);
         super.onPause();
     }
 
@@ -188,15 +136,7 @@ public class ChatActivity extends AppCompatActivity {
         } else if (requestCode == RC_PHOTO_PICKER) {
             if (resultCode == RESULT_OK) {
                 Uri photoUri = data.getData();
-                StorageReference photoReference = storageReference.child(photoUri.getLastPathSegment());
-                photoReference.putFile(photoUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        databaseReference.push().setValue(new FriendlyMessage(null, mUsername, taskSnapshot.getDownloadUrl().toString()));
-                    }
-
-                });
+                presenter.sendPhoto(photoUri);
             }
         }
     }
@@ -233,63 +173,9 @@ public class ChatActivity extends AppCompatActivity {
 
     @OnClick(R.id.sendButton)
     public void send() {
-        FriendlyMessage friendlyMessage = new FriendlyMessage(
-                mMessageEditText.getText().toString(),
-                mUsername,
-                null);
-        databaseReference.push().setValue(friendlyMessage);
-
+        presenter.sendMessage(mMessageEditText.getText().toString());
         // Clear input box
         mMessageEditText.setText("");
-    }
-
-    private void onSignedIn(final String userName) {
-        mUsername = userName;
-        attachDatabaseListener();
-    }
-
-    private void onSignedOut() {
-        dettachDatabaseListener();
-        mUsername = ANONYMOUS;
-        mMessageAdapter.clear();
-    }
-
-    private void attachDatabaseListener() {
-        if (childEventListener == null) {
-            childEventListener = new ChildEventListener() {
-
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    mMessageAdapter.add(dataSnapshot.getValue(FriendlyMessage.class));
-                }
-
-                // region Non used methods
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                }
-                // endregion
-            };
-        }
-        databaseReference.addChildEventListener(childEventListener);
-    }
-
-    private void dettachDatabaseListener() {
-        if (childEventListener != null) {
-            databaseReference.removeEventListener(childEventListener);
-        }
-        childEventListener = null;
     }
 
     private void launchPhotoPicker() {
@@ -299,6 +185,39 @@ public class ChatActivity extends AppCompatActivity {
         startActivityForResult(
                 Intent.createChooser(intent, "Complete action using"),
                 RC_PHOTO_PICKER);
+    }
+
+    @Override
+    public void clearChat() {
+        mMessageAdapter.clear();
+    }
+
+    @Override
+    public void addMessage(final FriendlyMessage message) {
+        mMessageAdapter.add(message);
+    }
+
+    @Override
+    public void showMessages(final List<FriendlyMessage> messages) {
+        mMessageAdapter.clear();
+        mMessageAdapter.addAll(messages);
+    }
+
+    @Override
+    public void showAuthenticated(final String userName) {
+        Toast.makeText(this, "Signed in as " + userName, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showNotAuthenticated() {
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setIsSmartLockEnabled(false)
+                        .setProviders(Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
+                                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
+                        .build(),
+                RC_SIGN_IN);
     }
 
     @ActivityScope
