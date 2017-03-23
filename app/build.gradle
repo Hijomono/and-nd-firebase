@@ -55,6 +55,7 @@ dependencies {
     compile "com.google.firebase:firebase-storage:$versions.firebase"
     compile "com.google.firebase:firebase-auth:$versions.firebase"
     compile "com.firebaseui:firebase-ui-auth:$versions.firebaseui"
+    compile "com.google.firebase:firebase-messaging:$versions.firebase"
 
     compile "com.jakewharton:butterknife:$versions.butterknife"
     annotationProcessor "com.jakewharton:butterknife-compiler:$versions.butterknife"
