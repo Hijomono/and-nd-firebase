@@ -12,16 +12,23 @@ public final class FirebaseAuthManager implements AuthenticationManager {
     private final FirebaseAuth auth;
     private final List<AuthenticationChangedListener> listeners;
 
+    private boolean authenticated;
+
     public FirebaseAuthManager() {
         auth = FirebaseAuth.getInstance();
         listeners = new ArrayList<>();
+        authenticated = auth.getCurrentUser() != null;
         auth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull final FirebaseAuth firebaseAuth) {
-                synchronized (listeners) {
-                    final String user = getUser(firebaseAuth);
-                    for (AuthenticationChangedListener listener : listeners) {
-                        listener.onUserAuthenticated(user);
+                final String user = getUser(firebaseAuth);
+                final boolean isAuthenticatedNow = user != null;
+                if (authenticated != isAuthenticatedNow) {
+                    authenticated = isAuthenticatedNow;
+                    synchronized (listeners) {
+                        for (AuthenticationChangedListener listener : listeners) {
+                            listener.onUserAuthenticated(user);
+                        }
                     }
                 }
             }
