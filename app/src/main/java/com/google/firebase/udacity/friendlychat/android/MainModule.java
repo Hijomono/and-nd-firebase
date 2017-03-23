@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.google.firebase.udacity.friendlychat.android.authentication.AuthenticationManager;
 import com.google.firebase.udacity.friendlychat.android.authentication.FirebaseAuthManager;
+import com.google.firebase.udacity.friendlychat.data.FirebaseChatStorage;
+import com.google.firebase.udacity.friendlychat.domain.repository.ChatRepository;
 
 import javax.inject.Singleton;
 
@@ -29,6 +31,12 @@ public class MainModule {
     @Provides
     public AuthenticationManager provideAuthenticationManager() {
         return new FirebaseAuthManager();
+    }
+
+    @Singleton
+    @Provides
+    public ChatRepository provideChatRepository(final AuthenticationManager authenticationManager) {
+        return new FirebaseChatStorage(authenticationManager);
     }
 
 }
