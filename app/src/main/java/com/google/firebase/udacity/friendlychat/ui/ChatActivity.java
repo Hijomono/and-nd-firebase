@@ -106,7 +106,7 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
         ButterKnife.bind(this);
         DaggerChatActivity_Component.builder()
-                .mainComponent(FriendlyChatApplication.getComponent())
+                .mainComponent(((FriendlyChatApplication) getApplication()).getComponent())
                 .build()
                 .inject(this);
 

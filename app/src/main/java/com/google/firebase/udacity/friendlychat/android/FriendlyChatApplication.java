@@ -4,7 +4,7 @@ import android.app.Application;
 
 public final class FriendlyChatApplication extends Application {
 
-    private static MainComponent component;
+    private MainComponent component;
 
     @Override
     public void onCreate() {
@@ -14,7 +14,7 @@ public final class FriendlyChatApplication extends Application {
                 .build();
     }
 
-    public static MainComponent getComponent() {
+    public MainComponent getComponent() {
         return component;
     }
 
