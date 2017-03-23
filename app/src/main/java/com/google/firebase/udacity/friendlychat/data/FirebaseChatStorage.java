@@ -18,7 +18,9 @@ import com.google.firebase.udacity.friendlychat.domain.model.FriendlyMessage;
 import com.google.firebase.udacity.friendlychat.domain.repository.ChatRepository;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class FirebaseChatStorage implements ChatRepository {
 
@@ -30,20 +32,25 @@ public final class FirebaseChatStorage implements ChatRepository {
     private final StorageReference photosDatabase;
     private final List<ChatListener> listeners;
     private final List<FriendlyMessage> messages;
+    private final Set<String> messagesKeys;
 
     private String userName;
 
     public FirebaseChatStorage(final AuthenticationManager authenticationManager) {
         listeners = new ArrayList<>();
         messages = new ArrayList<>();
+        messagesKeys = new HashSet<>();
         childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(final DataSnapshot dataSnapshot, final String s) {
                 synchronized (listeners) {
-                    final FriendlyMessage message = dataSnapshot.getValue(FriendlyMessage.class);
-                    messages.add(message);
-                    for (final ChatListener listener : listeners) {
-                        listener.onMessageAdded(message);
+                    if (!messagesKeys.contains(dataSnapshot.getKey())) {
+                        messagesKeys.add(dataSnapshot.getKey());
+                        final FriendlyMessage message = dataSnapshot.getValue(FriendlyMessage.class);
+                        messages.add(message);
+                        for (final ChatListener listener : listeners) {
+                            listener.onMessageAdded(message);
+                        }
                     }
                 }
             }
@@ -130,6 +137,7 @@ public final class FirebaseChatStorage implements ChatRepository {
     private void clearChat() {
         synchronized (listeners) {
             messages.clear();
+            messagesKeys.clear();
             for (final ChatListener listener : listeners) {
                 listener.onChatCleared();
             }
