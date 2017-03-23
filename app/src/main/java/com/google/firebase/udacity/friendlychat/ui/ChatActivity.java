@@ -214,6 +214,8 @@ public class ChatActivity extends AppCompatActivity implements ChatActivityPrese
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setIsSmartLockEnabled(false)
+                        .setTheme(R.style.AppTheme)
+                        .setLogo(R.mipmap.ic_launcher)
                         .setProviders(Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
                                 new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
                         .build(),
