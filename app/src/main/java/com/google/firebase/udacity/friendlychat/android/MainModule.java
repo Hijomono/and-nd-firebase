@@ -8,6 +8,7 @@ import com.google.firebase.udacity.friendlychat.data.FirebaseChatStorage;
 import com.google.firebase.udacity.friendlychat.data.FirebaseConfig;
 import com.google.firebase.udacity.friendlychat.domain.repository.ChatRepository;
 import com.google.firebase.udacity.friendlychat.domain.repository.MessageValidator;
+import com.google.firebase.udacity.friendlychat.ui.UiConfig;
 
 import javax.inject.Singleton;
 
@@ -43,8 +44,20 @@ public class MainModule {
 
     @Singleton
     @Provides
-    public MessageValidator provideMessageValidator() {
+    public FirebaseConfig provideFirebaseConfig() {
         return new FirebaseConfig();
+    }
+
+    @Singleton
+    @Provides
+    public MessageValidator provideMessageValidator(final FirebaseConfig firebaseConfig) {
+        return firebaseConfig;
+    }
+
+    @Singleton
+    @Provides
+    public UiConfig provideUiConfig(final FirebaseConfig firebaseConfig) {
+        return firebaseConfig;
     }
 
 }

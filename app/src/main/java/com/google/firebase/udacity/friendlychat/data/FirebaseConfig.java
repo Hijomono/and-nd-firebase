@@ -5,11 +5,12 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.udacity.friendlychat.BuildConfig;
 import com.google.firebase.udacity.friendlychat.domain.repository.MessageValidator;
+import com.google.firebase.udacity.friendlychat.ui.UiConfig;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public final class FirebaseConfig implements MessageValidator {
+public final class FirebaseConfig implements MessageValidator, UiConfig {
 
     private static final int EXPIRATION_TIME = 3600;
 
@@ -33,9 +34,16 @@ public final class FirebaseConfig implements MessageValidator {
         return ((Long) config.getLong(MessageValidator.MAX_MESSAGE_LENGTH_KEY)).intValue();
     }
 
+    @Override
+    public int getMessageTextSize() {
+        fetchIfNeeded();
+        return ((Long) config.getLong(UiConfig.MESSAGE_TEXT_SIZE_KEY)).intValue();
+    }
+
     private Map<String, Object> getDefaultConfigMap() {
         final Map<String, Object> configMap = new HashMap<>();
         configMap.put(MessageValidator.MAX_MESSAGE_LENGTH_KEY, MessageValidator.DEFAULT_MAX_MESSAGE_LENGTH);
+        configMap.put(UiConfig.MESSAGE_TEXT_SIZE_KEY, UiConfig.DEFAULT_MESSAGE_TEXT_SIZE);
         return configMap;
     }
 

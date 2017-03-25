@@ -18,6 +18,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MessageAdapter extends ArrayAdapter<FriendlyMessage> {
+
+    private int messageSize = UiConfig.DEFAULT_MESSAGE_TEXT_SIZE;
+
     public MessageAdapter(Context context, int resource, List<FriendlyMessage> objects) {
         super(context, resource, objects);
     }
@@ -27,7 +30,7 @@ public class MessageAdapter extends ArrayAdapter<FriendlyMessage> {
         if (convertView == null) {
             convertView = ((Activity) getContext()).getLayoutInflater().inflate(R.layout.item_message, parent, false);
         }
-        final ViewHolder holder = new ViewHolder(convertView);
+        final ViewHolder holder = new ViewHolder(convertView, messageSize);
         final FriendlyMessage message = getItem(position);
 
         if (message.getPhotoUrl() != null) {
@@ -46,6 +49,10 @@ public class MessageAdapter extends ArrayAdapter<FriendlyMessage> {
         return convertView;
     }
 
+    public void setMessageTextSize(final int size) {
+        messageSize = size;
+    }
+
     static class ViewHolder {
 
         @BindView(R.id.photoImageView)
@@ -55,8 +62,9 @@ public class MessageAdapter extends ArrayAdapter<FriendlyMessage> {
         @BindView(R.id.nameTextView)
         TextView name;
 
-        ViewHolder(final View view) {
+        ViewHolder(final View view, final int textSize) {
             ButterKnife.bind(this, view);
+            message.setTextSize(textSize);
         }
 
     }

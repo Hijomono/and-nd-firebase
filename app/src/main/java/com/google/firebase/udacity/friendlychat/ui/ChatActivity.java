@@ -66,6 +66,8 @@ public class ChatActivity extends AppCompatActivity implements ChatActivityPrese
 
     @Inject
     ChatActivityPresenter presenter;
+    @Inject
+    UiConfig config;
 
     @BindView(R.id.messageListView)
     ListView mMessageListView;
@@ -91,6 +93,7 @@ public class ChatActivity extends AppCompatActivity implements ChatActivityPrese
         // Initialize message ListView and its adapter
         List<FriendlyMessage> friendlyMessages = new ArrayList<>();
         mMessageAdapter = new MessageAdapter(this, R.layout.item_message, friendlyMessages);
+        mMessageAdapter.setMessageTextSize(config.getMessageTextSize());
         mMessageListView.setAdapter(mMessageAdapter);
     }
 
