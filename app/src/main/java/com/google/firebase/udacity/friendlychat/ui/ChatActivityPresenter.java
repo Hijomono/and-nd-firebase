@@ -8,6 +8,7 @@ import com.google.firebase.udacity.friendlychat.android.ActivityScope;
 import com.google.firebase.udacity.friendlychat.android.authentication.AuthenticationManager;
 import com.google.firebase.udacity.friendlychat.domain.model.FriendlyMessage;
 import com.google.firebase.udacity.friendlychat.domain.repository.ChatRepository;
+import com.google.firebase.udacity.friendlychat.domain.repository.MessageValidator;
 
 import java.util.List;
 
@@ -19,16 +20,19 @@ public final class ChatActivityPresenter implements
 
     private final ChatRepository chatRepository;
     private final AuthenticationManager authenticationManager;
+    private final MessageValidator messageValidator;
 
     private View view;
 
     @Inject
     public ChatActivityPresenter(
             final ChatRepository chatRepository,
-            final AuthenticationManager authenticationManager) {
+            final AuthenticationManager authenticationManager,
+            final MessageValidator messageValidator) {
 
         this.chatRepository = chatRepository;
         this.authenticationManager = authenticationManager;
+        this.messageValidator = messageValidator;
     }
 
     @Override
@@ -70,6 +74,7 @@ public final class ChatActivityPresenter implements
         this.view = view;
         authenticationManager.addAuthenticationChangedListener(this);
         chatRepository.addChatListener(this);
+        view.setMessageLengthLimit(messageValidator.getMaxLength());
     }
 
     public void detach(@NonNull final View view) {
@@ -104,6 +109,8 @@ public final class ChatActivityPresenter implements
         void showAuthenticated(String userName);
 
         void showNotAuthenticated();
+
+        void setMessageLengthLimit(int lengthLimit);
 
     }
 

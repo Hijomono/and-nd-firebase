@@ -92,8 +92,6 @@ public class ChatActivity extends AppCompatActivity implements ChatActivityPrese
         List<FriendlyMessage> friendlyMessages = new ArrayList<>();
         mMessageAdapter = new MessageAdapter(this, R.layout.item_message, friendlyMessages);
         mMessageListView.setAdapter(mMessageAdapter);
-
-        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
     }
 
     @Override
@@ -220,6 +218,11 @@ public class ChatActivity extends AppCompatActivity implements ChatActivityPrese
                                 new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
                         .build(),
                 RC_SIGN_IN);
+    }
+
+    @Override
+    public void setMessageLengthLimit(final int lengthLimit) {
+        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(lengthLimit)});
     }
 
     @ActivityScope
